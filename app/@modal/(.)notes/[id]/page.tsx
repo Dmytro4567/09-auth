@@ -1,5 +1,5 @@
 import {dehydrate, HydrationBoundary, QueryClient} from '@tanstack/react-query';
-import {fetchNoteById} from '@/lib/api';
+import {fetchNoteById} from '@/lib/api/clientApi';
 import NotePreview from './NotePreview.client';
 
 export default async function ModalNotePage({params}: { params: Promise<{ id: string }> }) {
@@ -8,7 +8,7 @@ export default async function ModalNotePage({params}: { params: Promise<{ id: st
 
     await queryClient.prefetchQuery({
         queryKey: ['note', Number(id)],
-        queryFn: () => fetchNoteById(Number(id)),
+        queryFn: () => fetchNoteById(id),
     });
 
     const dehydratedState = dehydrate(queryClient);

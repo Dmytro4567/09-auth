@@ -1,7 +1,7 @@
 import css from './NoteList.module.css';
 import type {Note} from '@/types/note';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
-import {deleteNote} from '@/lib/api';
+import {deleteNote} from '@/lib/api/clientApi';
 import {useState} from 'react';
 import Link from "next/link";
 
@@ -11,11 +11,11 @@ interface NoteListProps {
 
 export default function NoteList({notes}: NoteListProps) {
     const queryClient = useQueryClient();
-    const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const {mutate} = useMutation({
         mutationFn: deleteNote,
-        onMutate: (id: number) => setDeletingId(id),
+        onMutate: (id: string) => setDeletingId(id),
         onSettled: () => setDeletingId(null),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['notes']});
@@ -26,7 +26,7 @@ export default function NoteList({notes}: NoteListProps) {
         <ul className={css.list}>
             {notes.map((note) => (
                 <li key={note.id} className={css.listItem}>
-                    {deletingId === note.id ? (
+                    {deletingId === note.id.toString() ? (
                         <p>Deleting...</p>
                     ) : (
                         <>
@@ -38,9 +38,9 @@ export default function NoteList({notes}: NoteListProps) {
                                     <Link href={`/notes/${note.id}`} className={css.link} scroll={false}>
                                         View details
                                     </Link>
-                                    <button onClick={() => mutate(note.id)}
+                                    <button onClick={() => mutate(note.id.toString())}
                                             className={css.button}
-                                            disabled={deletingId === note.id}
+                                            disabled={deletingId === note.id.toString()}
                                     >
                                         Delete
                                     </button>

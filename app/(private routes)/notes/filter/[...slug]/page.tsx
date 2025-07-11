@@ -1,4 +1,4 @@
-import {fetchNotes} from '@/lib/api';
+import {fetchNotes} from '@/lib/api/clientApi';
 import Notes from './Notes.client';
 import {Metadata} from "next";
 
@@ -35,7 +35,12 @@ export default async function FilteredNotesPage({params}: { params: Promise<Filt
     const {slug} = await params;
     const tag = slug?.[0] ?? null;
 
-    const data = await fetchNotes('', 1, 12, tag);
+    const data = await fetchNotes({
+        search: '',
+        page: 1,
+        perPage: 12,
+        tag,
+    });
 
     return <Notes tag={tag} initialData={data}/>;
 }
