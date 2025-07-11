@@ -1,5 +1,6 @@
 import css from "./Header.module.css";
 import TagsMenu from '../TagsMenu/TagsMenu';
+import AuthNavigation from '../AuthNavigation/AuthNavigation';
 import Link from 'next/link';
 
 const Header = () => {
@@ -14,8 +15,9 @@ const Header = () => {
                         <Link href="/">Home</Link>
                     </li>
                     <li>
-                        <TagsMenu />
+                        <TagsMenu/>
                     </li>
+                    <AuthNavigation/>
                 </ul>
             </nav>
         </header>
