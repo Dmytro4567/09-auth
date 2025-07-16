@@ -1,14 +1,31 @@
 'use client';
 
-import React from 'react';
+import React, {useState} from 'react';
 import css from './SignIn.module.css';
+import {login, LoginRequest} from "@/lib/api/clientApi";
+import {useRouter} from "next/navigation";
 
 export default function SignIn() {
-    const error = ''; // поки що статично
+    const router = useRouter();
+    const [error, setError] = useState('');
+    const handleSubmit = async (formData: FormData) => {
+        try {
+            const formValues = Object.fromEntries(formData) as LoginRequest;
+            const res = await login(formValues);
+            if (res) {
+                router.push('/profile');
+            } else {
+                setError('Invalid email or password');
+            }
+        } catch (error) {
+            console.log('error', error);
+            setError('Invalid email or password');
+        }
+    };
 
     return (
         <main className={css.mainContent}>
-            <form className={css.form}>
+            <form className={css.form} action={handleSubmit}>
                 <h1 className={css.formTitle}>Sign in</h1>
 
                 <div className={css.formGroup}>
@@ -39,7 +56,7 @@ export default function SignIn() {
                     </button>
                 </div>
 
-                <p className={css.error}>{error}</p>
+                {error && <p className={css.error}>{error}</p>}
             </form>
         </main>
     );

@@ -13,6 +13,11 @@ export type RegisterResponse = {
     message?: string;
 };
 
+export type LoginRequest = {
+    email: string;
+    password: string;
+};
+
 export const fetchNotes = async (params: {
     search?: string;
     page?: number;
@@ -40,13 +45,13 @@ export const deleteNote = async (id: string): Promise<Note> => {
 
 // auth
 export const register = async (data: RegisterRequest) => {
-    const res = await nextServer.post<RegisterResponse>('/auth/register', data);
+    const res = await nextServer.post<User>('/auth/register', data);
     return res.data;
 };
 
-export const loginUser = async (email: string, password: string): Promise<User> => {
-    const {data} = await nextServer.post('/auth/login', {email, password});
-    return data;
+export const login = async (data: LoginRequest) => {
+    const res = await nextServer.post<User>('/auth/login', data);
+    return res.data;
 };
 
 export const logoutUser = async (): Promise<void> => {
