@@ -18,6 +18,10 @@ export type LoginRequest = {
     password: string;
 };
 
+type CheckSessionRequest = {
+    success: boolean;
+};
+
 export const fetchNotes = async (params: {
     search?: string;
     page?: number;
@@ -54,6 +58,18 @@ export const login = async (data: LoginRequest) => {
     return res.data;
 };
 
-export const logoutUser = async (): Promise<void> => {
-    await nextServer.post('/auth/logout');
+export const checkSession = async () => {
+    const res = await nextServer.get<CheckSessionRequest>('/auth/session');
+    return res.data.success;
+};
+
+export const getMe = async () => {
+    const { data } = await nextServer.get<User>('/auth/me');
+    return data;
+};
+
+
+export const logout = async (): Promise<void> => {
+    const { data } = await nextServer.post('/auth/logout');
+    return data;
 };

@@ -4,15 +4,18 @@ import React, {useState} from 'react';
 import css from './SignIn.module.css';
 import {login, LoginRequest} from "@/lib/api/clientApi";
 import {useRouter} from "next/navigation";
+import {useAuthStore} from "@/lib/store/authStore";
 
 export default function SignIn() {
     const router = useRouter();
     const [error, setError] = useState('');
+    const setUser = useAuthStore((state) => state.setUser);
     const handleSubmit = async (formData: FormData) => {
         try {
             const formValues = Object.fromEntries(formData) as LoginRequest;
             const res = await login(formValues);
             if (res) {
+                setUser(res);
                 router.push('/profile');
             } else {
                 setError('Invalid email or password');
