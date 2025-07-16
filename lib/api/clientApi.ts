@@ -1,6 +1,17 @@
-import { api } from './api';
-import type { Note, CreateNote } from '@/types/note';
-import type { User } from '@/types/user';
+import {nextServer} from './api';
+import type {Note, CreateNote} from '@/types/note';
+import type {User} from '@/types/user';
+
+export type RegisterRequest = {
+    email: string;
+    password: string;
+};
+
+export type RegisterResponse = {
+    email?: string;
+    password?: string;
+    message?: string;
+};
 
 export const fetchNotes = async (params: {
     search?: string;
@@ -8,36 +19,36 @@ export const fetchNotes = async (params: {
     perPage?: number;
     tag?: string | null;
 }): Promise<{ notes: Note[]; totalPages: number }> => {
-    const { data } = await api.get('/notes', { params });
+    const {data} = await nextServer.get('/notes', {params});
     return data;
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
-    const { data } = await api.get(`/notes/${id}`);
+    const {data} = await nextServer.get(`/notes/${id}`);
     return data;
 };
 
 export const createNote = async (note: CreateNote): Promise<Note> => {
-    const { data } = await api.post('/notes', note);
+    const {data} = await nextServer.post('/notes', note);
     return data;
 };
 
 export const deleteNote = async (id: string): Promise<Note> => {
-    const { data } = await api.delete(`/notes/${id}`);
+    const {data} = await nextServer.delete(`/notes/${id}`);
     return data;
 };
 
 // auth
-export const registerUser = async (email: string, password: string): Promise<User> => {
-    const { data } = await api.post('/auth/register', { email, password });
-    return data;
+export const register = async (data: RegisterRequest) => {
+    const res = await nextServer.post<RegisterResponse>('/auth/register', data);
+    return res.data;
 };
 
 export const loginUser = async (email: string, password: string): Promise<User> => {
-    const { data } = await api.post('/auth/login', { email, password });
+    const {data} = await nextServer.post('/auth/login', {email, password});
     return data;
 };
 
 export const logoutUser = async (): Promise<void> => {
-    await api.post('/auth/logout');
+    await nextServer.post('/auth/logout');
 };
