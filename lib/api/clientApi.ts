@@ -22,6 +22,10 @@ type CheckSessionRequest = {
     success: boolean;
 };
 
+type UserName = {
+    username: string;
+};
+
 export const fetchNotes = async (params: {
     search?: string;
     page?: number;
@@ -64,12 +68,17 @@ export const checkSession = async () => {
 };
 
 export const getMe = async () => {
-    const { data } = await nextServer.get<User>('/auth/me');
+    const {data} = await nextServer.get<User>('/auth/me');
     return data;
 };
 
 
 export const logout = async (): Promise<void> => {
-    const { data } = await nextServer.post('/auth/logout');
+    const {data} = await nextServer.post('/auth/logout');
+    return data;
+};
+
+export const editUser = async (userData: UserName) => {
+    const {data} = await nextServer.patch<User>('/users/me', userData);
     return data;
 };
