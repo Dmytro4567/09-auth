@@ -1,6 +1,7 @@
 import {nextServer} from './api';
 import type {Note, CreateNote} from '@/types/note';
 import type {User} from '@/types/user';
+import axios from "axios";
 
 interface NotesResponse {
     notes: Note[];
@@ -78,9 +79,11 @@ export const checkSession = async () => {
     try {
         const res = await nextServer.get('/auth/session');
         return res.data.success === true;
-
     } catch (err) {
-        console.error('checkSession error', err);
+        if (axios.isAxiosError(err) && err.response?.status === 401) {
+            return false;
+        }
+        console.error('checkSession unexpected error', err);
         return false;
     }
 };

@@ -1,22 +1,23 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useAuthStore } from "@/lib/store/authStore";
-import { checkSession, getMe } from "@/lib/api/clientApi";
+import {useEffect} from 'react';
+import {useAuthStore} from '@/lib/store/authStore';
+import {checkSession, getMe} from '@/lib/api/clientApi';
 
 type Props = {
     children: React.ReactNode;
 };
 
-const AuthProvider = ({ children }: Props) => {
+const AuthProvider = ({children}: Props) => {
     const setUser = useAuthStore((state) => state.setUser);
     const clearIsAuthenticated = useAuthStore((state) => state.clearIsAuthenticated);
 
     useEffect(() => {
-        const fetchUser = async () => {
+        const initAuth = async () => {
             try {
-                const isAuthenticated = await checkSession();
-                if (isAuthenticated) {
+                const sessionOk = await checkSession();
+
+                if (sessionOk) {
                     const user = await getMe();
                     if (user) {
                         setUser(user);
@@ -26,13 +27,13 @@ const AuthProvider = ({ children }: Props) => {
                 } else {
                     clearIsAuthenticated();
                 }
-            } catch (err) {
-                console.error('Failed to fetch user session:', err);
+            } catch (error) {
+                console.error('[AuthProvider] Failed to check session:', error);
                 clearIsAuthenticated();
             }
         };
 
-        fetchUser();
+        initAuth();
     }, [setUser, clearIsAuthenticated]);
 
     return <>{children}</>;
