@@ -64,7 +64,6 @@ export const deleteNote = async (id: string): Promise<Note> => {
     return data;
 };
 
-// auth
 export const register = async (data: RegisterRequest) => {
     const res = await nextServer.post<User>('/auth/register', data);
     return res.data;
@@ -78,8 +77,6 @@ export const login = async (data: LoginRequest) => {
 export const checkSession = async () => {
     try {
         const res = await nextServer.get('/auth/session');
-        console.log('/auth/session response:', res.data);
-
         return res.data.success === true;
 
     } catch (err) {

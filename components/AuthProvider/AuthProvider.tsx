@@ -16,10 +16,8 @@ const AuthProvider = ({ children }: Props) => {
         const fetchUser = async () => {
             try {
                 const isAuthenticated = await checkSession();
-                console.log('checkSession', isAuthenticated);
                 if (isAuthenticated) {
                     const user = await getMe();
-                    console.log('user from /users/me', user);
                     if (user) {
                         setUser(user);
                     } else {
