@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import css from './Notes.module.css';
 import NoteList from '@/components/NoteList/NoteList';
 import Pagination from '@/components/Pagination/Pagination';
@@ -12,15 +12,19 @@ import {useDebounce} from 'use-debounce';
 import Link from 'next/link';
 
 interface NotesClientProps {
-    tag?: string | null;
-    initialData: { notes: Note[]; totalPages: number };
+    query: string;
+    page: number;
+    tag: string;
+    initialData: {
+        notes: Note[];
+        totalPages: number;
+    };
 }
 
-export default function NotesClient({tag, initialData}: NotesClientProps) {
-    const [search, setSearch] = useState('');
-    const [page, setPage] = useState(1);
-    const [perPage] = useState(12);
-    const [debouncedSearch] = useDebounce(search, 500);
+export default function NotesClient({query, page, tag, initialData}: NotesClientProps) {
+    const [currentPage, setCurrentPage] = useState(page);
+    const [searchQuery, setSearchQuery] = useState(query);
+    const [debouncedSearch] = useDebounce(searchQuery, 300);
 
     const {
         data,
@@ -28,26 +32,32 @@ export default function NotesClient({tag, initialData}: NotesClientProps) {
         isError,
         isSuccess,
     } = useQuery<{ notes: Note[]; totalPages: number }>({
-        queryKey: ['notes', debouncedSearch, page, tag],
-        queryFn: () => fetchNotes(debouncedSearch, page, perPage, tag),
+        queryKey: ['notes', debouncedSearch, currentPage, tag],
+        queryFn: () => fetchNotes(debouncedSearch, currentPage, tag),
         placeholderData: keepPreviousData,
-        refetchOnMount: true,
-        initialData,
+        initialData: debouncedSearch === query && currentPage === page ? initialData : undefined,
     });
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [debouncedSearch]);
+
     const handleSearchChange = (value: string) => {
-        setSearch(value);
-        setPage(1);
+        setSearchQuery(value);
+    };
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
     };
 
     return (
         <div className={css.app}>
             <header className={css.toolbar}>
-                <SearchBox value={search} onChange={handleSearchChange}/>
+                <SearchBox value={searchQuery} onChange={handleSearchChange}/>
                 {isSuccess && data.totalPages > 1 && (
                     <Pagination
-                        currentPage={page}
-                        onPageChange={setPage}
+                        currentPage={currentPage}
+                        onPageChange={handlePageChange}
                         totalPages={data.totalPages}
                     />
                 )}
@@ -59,9 +69,7 @@ export default function NotesClient({tag, initialData}: NotesClientProps) {
             {isLoading && <p>Loading notes...</p>}
             {isError && <p>Error loading notes. Please try again later.</p>}
 
-            {isSuccess && data.notes.length > 0 && (
-                <NoteList notes={data.notes}/>
-            )}
+            {isSuccess && data.notes.length > 0 && <NoteList notes={data.notes}/>}
         </div>
     );
 }

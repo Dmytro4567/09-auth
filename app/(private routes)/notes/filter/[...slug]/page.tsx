@@ -1,46 +1,64 @@
 import {fetchNotes} from '@/lib/api/clientApi';
-import Notes from './Notes.client';
-import {Metadata} from "next";
+import {QueryClient, HydrationBoundary, dehydrate} from '@tanstack/react-query';
+import NotesClient from './Notes.client';
+import {Note} from '@/types/note';
+import {Metadata} from 'next';
 
-type FilterPageParams = { slug?: string[] };
+type NotesProps = {
+    params: Promise<{ slug?: string[] }>;
+};
 
-export async function generateMetadata({params}: { params: Promise<FilterPageParams> }): Promise<Metadata> {
+export async function generateMetadata({params}: NotesProps): Promise<Metadata> {
     const {slug} = await params;
-    const tag = slug?.[0] || 'All';
-    const capitalizedTag = tag.charAt(0).toUpperCase() + tag.slice(1);
-
-    const title = `NoteHub – Filter: ${capitalizedTag}`;
-    const description = `Viewing notes in the "${capitalizedTag}".`;
+    const tag = slug?.[0] ?? 'all';
 
     return {
-        title,
-        description,
+        title: tag === 'all' ? 'All notes' : tag,
+        description: `This page contains notes from the category ${tag === 'all' ? 'All notes' : tag}`,
         openGraph: {
-            title,
-            description,
-            url: `https://08-zustand-ten.vercel.app/notes/filter/${tag}`,
+            title: tag === 'all' ? 'All notes' : tag,
+            description: `This page contains notes from the category ${tag === 'all' ? 'All notes' : tag}`,
+            url: `https://08-zustand-your-project.vercel.app/notes/filter/${tag}`,
             images: [
                 {
                     url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
                     width: 1200,
                     height: 630,
-                    alt: 'NoteHub – Filtered Notes',
+                    alt: 'Notes',
                 },
             ],
         },
     };
 }
 
-export default async function FilteredNotesPage({params}: { params: Promise<FilterPageParams> }) {
+export default async function Notes({params}: NotesProps) {
     const {slug} = await params;
-    const tag = slug?.[0] ?? null;
 
-    const data = await fetchNotes({
-        search: '',
-        page: 1,
-        perPage: 12,
-        tag,
+    const queryClient = new QueryClient();
+    const initialQuery = '';
+    const initialPage = 1;
+    const tag = slug?.[0] === 'all' ? '' : slug?.[0] || '';
+
+    await queryClient.prefetchQuery({
+        queryKey: ['notes', initialQuery, initialPage, tag],
+        queryFn: () => fetchNotes(initialQuery, initialPage, tag),
     });
 
-    return <Notes tag={tag} initialData={data}/>;
+    const initialData = queryClient.getQueryData(['notes', initialQuery, initialPage, tag]) as {
+        notes: Note[];
+        totalPages: number;
+    };
+
+    return (
+        <HydrationBoundary state={dehydrate(queryClient)}>
+            <NotesClient
+                query={initialQuery}
+                page={initialPage}
+                initialData={initialData}
+                tag={tag || 'all'}
+            />
+        </HydrationBoundary>
+    );
 }
+
+export const dynamic = 'force-dynamic';

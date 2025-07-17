@@ -2,6 +2,18 @@ import {nextServer} from './api';
 import type {Note, CreateNote} from '@/types/note';
 import type {User} from '@/types/user';
 
+interface NotesResponse {
+    notes: Note[];
+    totalPages: number;
+}
+
+interface SearchParams {
+    page: number;
+    perPage: number;
+    search?: string;
+    tag?: string;
+}
+
 export type RegisterRequest = {
     email: string;
     password: string;
@@ -23,17 +35,19 @@ type UserName = {
 };
 
 
-export const fetchNotes = async (params: {
-    search?: string;
-    page?: number;
-    perPage?: number;
-    tag?: string | null;
-    sortBy?: 'created' | 'updated';
-}): Promise<{ notes: Note[]; totalPages: number }> => {
-    console.log('fetchNotes params:', params);
-    const {data} = await nextServer.get('/notes', {params});
-    return data;
-};
+export async function fetchNotes(search: string, page: number, tag?: string): Promise<NotesResponse> {
+    const perPage = 12;
+    const params: SearchParams = {page, perPage};
+
+    if (search) params.search = search;
+    if (tag) params.tag = tag;
+
+    const res = await nextServer.get<NotesResponse>('/notes', {
+        params,
+    });
+
+    return res.data;
+}
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
     const {data} = await nextServer.get(`/notes/${id}`);
