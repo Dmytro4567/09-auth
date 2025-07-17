@@ -18,20 +18,19 @@ export type LoginRequest = {
     password: string;
 };
 
-type CheckSessionRequest = {
-    success: boolean;
-};
-
 type UserName = {
     username: string;
 };
+
 
 export const fetchNotes = async (params: {
     search?: string;
     page?: number;
     perPage?: number;
     tag?: string | null;
+    sortBy?: 'created' | 'updated';
 }): Promise<{ notes: Note[]; totalPages: number }> => {
+    console.log('fetchNotes params:', params);
     const {data} = await nextServer.get('/notes', {params});
     return data;
 };
@@ -63,12 +62,21 @@ export const login = async (data: LoginRequest) => {
 };
 
 export const checkSession = async () => {
-    const res = await nextServer.get<CheckSessionRequest>('/auth/session');
-    return res.data.success;
+    try {
+        const res = await nextServer.get('/auth/session');
+        console.log('/auth/session response:', res.data);
+
+        return res.data.success === true;
+
+    } catch (err) {
+        console.error('checkSession error', err);
+        return false;
+    }
 };
 
+
 export const getMe = async () => {
-    const {data} = await nextServer.get<User>('/auth/me');
+    const {data} = await nextServer.get<User>('/users/me');
     return data;
 };
 
