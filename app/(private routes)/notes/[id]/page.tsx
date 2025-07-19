@@ -1,5 +1,6 @@
 import {dehydrate, HydrationBoundary, QueryClient} from '@tanstack/react-query';
 import {fetchNoteById} from '@/lib/api/clientApi';
+import {getServerNoteById} from '@/lib/api/serverApi';
 import NoteDetailsClient from './NoteDetails.client';
 import type {Metadata} from 'next';
 
@@ -8,11 +9,10 @@ interface PageProps {
 }
 
 export async function generateMetadata({params}: PageProps): Promise<Metadata> {
-    const awaitedParams = await params;
-    const id = awaitedParams.id;
+    const {id} = await params;
 
     try {
-        const note = await fetchNoteById(id);
+        const note = await getServerNoteById(id);
         const title = `NoteHub – ${note.title}`;
         const description = note.content.slice(0, 100);
 
@@ -22,7 +22,7 @@ export async function generateMetadata({params}: PageProps): Promise<Metadata> {
             openGraph: {
                 title,
                 description,
-                url: `https://08-zustand-ten.vercel.app/notes/${awaitedParams.id}`,
+                url: `https://08-zustand-ten.vercel.app/notes/${id}`,
                 images: [
                     {
                         url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
@@ -36,11 +36,11 @@ export async function generateMetadata({params}: PageProps): Promise<Metadata> {
     } catch {
         return {
             title: 'Note not found',
-            description: `Note with ID ${awaitedParams.id} was not found.`,
+            description: `Note with ID ${id} was not found.`,
             openGraph: {
                 title: 'Note not found',
-                description: `Note with ID ${awaitedParams.id} was not found.`,
-                url: `https://08-zustand-ten.vercel.app/notes/${awaitedParams.id}`,
+                description: `Note with ID ${id} was not found.`,
+                url: `https://08-zustand-ten.vercel.app/notes/${id}`,
                 images: [
                     {
                         url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
@@ -55,8 +55,8 @@ export async function generateMetadata({params}: PageProps): Promise<Metadata> {
 }
 
 export default async function NoteDetailsPage({params}: PageProps) {
-    const awaitedParams = await params;
-    const id = awaitedParams.id;
+    const {id} = await params;
+
     const queryClient = new QueryClient();
 
     await queryClient.prefetchQuery({
