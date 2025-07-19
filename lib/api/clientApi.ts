@@ -96,8 +96,7 @@ export const getMe = async () => {
 
 
 export const logout = async (): Promise<void> => {
-    const {data} = await nextServer.post('/auth/logout');
-    return data;
+    await nextServer.post('/auth/logout');
 };
 
 export const editUser = async (userData: UserName) => {
