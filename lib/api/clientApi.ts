@@ -1,7 +1,6 @@
-import {nextServer} from './api';
-import type {Note, CreateNote} from '@/types/note';
-import type {User} from '@/types/user';
-import axios from "axios";
+import { nextServer } from './api';
+import type { Note, CreateNote } from '@/types/note';
+import type { User } from '@/types/user';
 
 interface NotesResponse {
     notes: Note[];
@@ -20,12 +19,6 @@ export type RegisterRequest = {
     password: string;
 };
 
-export type RegisterResponse = {
-    email?: string;
-    password?: string;
-    message?: string;
-};
-
 export type LoginRequest = {
     email: string;
     password: string;
@@ -35,10 +28,13 @@ type UserName = {
     username: string;
 };
 
-
-export async function fetchNotes(search: string, page: number, tag?: string): Promise<NotesResponse> {
+export async function fetchNotes(
+    search: string,
+    page: number,
+    tag?: string
+): Promise<NotesResponse> {
     const perPage = 12;
-    const params: SearchParams = {page, perPage};
+    const params: SearchParams = { page, perPage };
 
     if (search) params.search = search;
     if (tag) params.tag = tag;
@@ -51,55 +47,50 @@ export async function fetchNotes(search: string, page: number, tag?: string): Pr
 }
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
-    const {data} = await nextServer.get(`/notes/${id}`);
+    const { data } = await nextServer.get<Note>(`/notes/${id}`);
     return data;
 };
 
 export const createNote = async (note: CreateNote): Promise<Note> => {
-    const {data} = await nextServer.post('/notes', note);
+    const { data } = await nextServer.post<Note>('/notes', note);
     return data;
 };
 
 export const deleteNote = async (id: string): Promise<Note> => {
-    const {data} = await nextServer.delete(`/notes/${id}`);
+    const { data } = await nextServer.delete<Note>(`/notes/${id}`);
     return data;
 };
 
-export const register = async (data: RegisterRequest) => {
+export const register = async (data: RegisterRequest): Promise<User> => {
     const res = await nextServer.post<User>('/auth/register', data);
     return res.data;
 };
 
-export const login = async (data: LoginRequest) => {
+export const login = async (data: LoginRequest): Promise<User> => {
     const res = await nextServer.post<User>('/auth/login', data);
     return res.data;
 };
 
-export const checkSession = async () => {
+export const checkSession = async (): Promise<boolean> => {
     try {
-        const res = await nextServer.get('/auth/session');
+        const res = await nextServer.get<{ success: boolean }>('/auth/session');
         return res.data.success === true;
-    } catch (err) {
-        if (axios.isAxiosError(err) && err.response?.status === 401) {
-            return false;
-        }
+    } catch (err: unknown) {
         console.error('checkSession unexpected error', err);
         return false;
     }
 };
 
-
-export const getMe = async () => {
-    const {data} = await nextServer.get<User>('/users/me');
+export const getMe = async (): Promise<User> => {
+    const { data } = await nextServer.get<User>('/users/me');
     return data;
 };
-
 
 export const logout = async (): Promise<void> => {
     await nextServer.post('/auth/logout');
 };
 
-export const editUser = async (userData: UserName) => {
-    const {data} = await nextServer.patch<User>('/users/me', userData);
+export const editUser = async (userData: UserName): Promise<User> => {
+    const { data } = await nextServer.patch<User>('/users/me', userData);
     return data;
 };
