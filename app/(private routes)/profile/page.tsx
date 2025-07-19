@@ -2,6 +2,7 @@ import css from './Profile.module.css';
 import {Metadata} from 'next';
 import Link from 'next/link';
 import {getServerMe} from "@/lib/api/serverApi";
+import Image from 'next/image'; // 👈 добавили
 
 export const metadata: Metadata = {
     title: 'User Profile | NoteHub',
@@ -25,8 +26,8 @@ export default async function Profile() {
                 </div>
 
                 <div className={css.avatarWrapper}>
-                    <img
-                        src={user?.avatar}
+                    <Image
+                        src={user?.avatar || '/default-avatar.jpg'}
                         alt="User Avatar"
                         width={120}
                         height={120}
