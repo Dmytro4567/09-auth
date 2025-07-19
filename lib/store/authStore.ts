@@ -1,6 +1,6 @@
-import { User } from "@/types/user";
-import { create } from "zustand";
-import { getMe } from "@/lib/api/clientApi";
+import {User} from "@/types/user";
+import {create} from "zustand";
+import {getMe} from "@/lib/api/clientApi";
 
 type AuthStore = {
     isAuthenticated: boolean;
@@ -16,19 +16,19 @@ export const useAuthStore = create<AuthStore>()(
         user: null,
 
         setUser: (user: User) => {
-            set(() => ({ user, isAuthenticated: true }));
+            set(() => ({user, isAuthenticated: true}));
         },
 
         clearIsAuthenticated: () => {
-            set(() => ({ user: null, isAuthenticated: false }));
+            set(() => ({user: null, isAuthenticated: false}));
         },
 
         checkAuth: async () => {
             try {
                 const user = await getMe();
-                set({ user, isAuthenticated: true });
+                set({user, isAuthenticated: true});
             } catch {
-                set({ user: null, isAuthenticated: false });
+                set({user: null, isAuthenticated: false});
             }
         },
     })
